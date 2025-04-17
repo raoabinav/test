@@ -54,65 +54,43 @@ const App = () => {
   } | null>(null)
 
   useEffect(() => {
-    console.log('UI コンポーネントがマウントされました');
-
     // バックグラウンドスクリプトにストレージデータ取得をリクエスト
     chrome.runtime.sendMessage({
       action: 'getSupabaseData'
     }).then(response => {
-      console.log('ストレージデータを受信:', response?.supabaseUrl ? '成功' : '失敗');
       if (response) {
         setUrl(response.supabaseUrl);
         setKey(response.supabaseKey);
       }
-    }).catch(e => {
-      console.error('ストレージデータ取得リクエストエラー:', e);
-    });
+    }).catch(() => {});
 
     const messageListener = (message: any) => {
-      console.log('UI がメッセージを受信:', message.action);
       if (message.action === 'rlsCheckResult') {
-        console.log('RLSチェック結果を受信:', {
-          成功: message.success,
-          テーブル数: message.disabledTables?.length || 0
-        });
         setChecking(false)
         setResult(message)
-        console.log('UI状態を更新: チェック完了');
       }
     }
 
-    console.log('メッセージリスナーを登録');
     chrome.runtime.onMessage.addListener(messageListener)
 
     return () => {
-      console.log('UI コンポーネントがアンマウントされます');
       chrome.runtime.onMessage.removeListener(messageListener);
-      console.log('メッセージリスナーを削除');
     }
   }, [])
 
   const removePopup = () => {
-    console.log('ポップアップを削除します');
     const popupContainer = document.getElementById('supabase-rls-checker-popup');
     if (popupContainer) {
       document.body.removeChild(popupContainer);
-      console.log('ポップアップが削除されました');
-    } else {
-      console.warn('ポップアップ要素が見つかりません');
     }
   }
 
   const execute = () => {
     if (!url || !key) {
-      console.warn('URLまたはAPIキーが設定されていません');
       return;
     }
-    console.log('RLSチェックを実行します');
-    console.log('チェック対象テーブル数:', TABLES.length);
     setChecking(true)
     setResult(null)
-    console.log('UI状態を更新: チェック中');
 
     chrome.runtime.sendMessage({
       action: 'execute',
@@ -120,20 +98,13 @@ const App = () => {
       supabaseKey: key,
       tables: TABLES
     });
-    console.log('バックグラウンドスクリプトにメッセージを送信しました');
   }
 
   const cancel = () => {
-    console.log('ユーザーがキャンセルしました');
-    // バックグラウンドスクリプトにメッセージを送信してストレージ操作を依頼
     chrome.runtime.sendMessage({
       action: 'setRlsPrompted',
       value: true
-    }).then(() => {
-      console.log('rlsPrompted フラグ設定リクエストを送信しました');
-    }).catch(e => {
-      console.error('rlsPrompted フラグ設定リクエスト送信エラー:', e);
-    });
+    }).catch(() => {});
     removePopup();
   }
 
@@ -199,7 +170,6 @@ const App = () => {
                   if (key) {
                     navigator.clipboard.writeText(key)
                       .then(() => {
-                        // Optional: Show a temporary success message
                         const btn = document.activeElement as HTMLButtonElement;
                         const originalText = btn.innerText;
                         btn.innerText = 'コピー済';
@@ -207,7 +177,7 @@ const App = () => {
                           btn.innerText = originalText;
                         }, 1000);
                       })
-                      .catch(err => console.error('コピーに失敗しました:', err));
+                      .catch(() => {});
                   }
                 }}
                 style={{
@@ -320,11 +290,8 @@ let container = document.getElementById('supabase-rls-checker-popup');
 
 // 存在しない場合のみ新しく作成
 if (!container) {
-  console.log('ポップアップを新規作成します');
   container = document.createElement('div');
   container.id = 'supabase-rls-checker-popup';
   document.body.appendChild(container);
   createRoot(container).render(<App />);
-} else {
-  console.log('既存のポップアップが見つかりました。重複作成をスキップします');
 }
