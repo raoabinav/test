@@ -1,5 +1,15 @@
 # Supabase RLS Checker
 
+## Background of Development
+
+With the growing popularity of vibe coding, more people are now able to participate in service development.
+
+However, over the past few months, I've discovered and reported vulnerabilities across more than five websites, leading to the exposure of over 10,000 pieces of personal information, such as email addresses. During this process, it became clear that many services are being released without sufficient understanding of personal data handling and security measures.
+
+In particular, websites using Supabase frequently had improperly configured Row Level Security (RLS), significantly increasing the risk of personal data leakage.
+
+I developed this extension to streamline my reporting of vulnerabilities and to help users easily identify secure websites, enabling safer use of individually developed services.
+
 ## Overview
 
 Supabase RLS Checker is a Chrome extension that automatically verifies Row Level Security (RLS) settings for Supabase databases used by websites. It detects tables with disabled RLS settings that should be protecting sensitive data and immediately notifies you of security risks.
