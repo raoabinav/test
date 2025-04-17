@@ -3,7 +3,7 @@ import { decodeJwtAndGetProjectRef } from './common/utils'
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
   (info) => {
-    if (info.url.includes('.supabase.co/rest/v1/')) {
+    if (info.url.includes('.supabase.co/')) {
       const apiKeyHeader = info.requestHeaders?.find(h =>
         h.name.toLowerCase() === 'apikey'
       )?.value;

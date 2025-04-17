@@ -6,7 +6,7 @@ const originalFetch = window.fetch;
 window.fetch = function(input: RequestInfo | URL, init?: RequestInit) {
   const url = input instanceof Request ? input.url : input.toString();
   
-  if (url.includes('.supabase.co/rest/v1/')) {
+  if (url.includes('.supabase.co/')) {
     const headers = init?.headers || (input instanceof Request ? input.headers : new Headers());
     let apiKey: string | null = null;
     
@@ -58,7 +58,7 @@ XMLHttpRequest.prototype.setRequestHeader = function(name: string, value: string
   // APIキーヘッダーを検出
   if ((name.toLowerCase() === 'apikey' || name.toLowerCase() === 'authorization') && 
       (this as any)._supabaseUrl && 
-      (this as any)._supabaseUrl.includes('.supabase.co/rest/v1/')) {
+      (this as any)._supabaseUrl.includes('.supabase.co/')) {
     
     const apiKeyValue = cleanApiKey(value);
     
