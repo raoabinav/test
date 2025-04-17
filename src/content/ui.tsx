@@ -54,36 +54,86 @@ const App = () => {
   } | null>(null)
 
   useEffect(() => {
-    chrome.storage.session.get(['supabaseUrl','supabaseKey'])
-      .then(r => { setUrl(r.supabaseUrl); setKey(r.supabaseKey); })
-    
+    console.log('UI コンポーネントがマウントされました');
+
+    // バックグラウンドスクリプトにストレージデータ取得をリクエスト
+    chrome.runtime.sendMessage({
+      action: 'getSupabaseData'
+    }).then(response => {
+      console.log('ストレージデータを受信:', response?.supabaseUrl ? '成功' : '失敗');
+      if (response) {
+        setUrl(response.supabaseUrl);
+        setKey(response.supabaseKey);
+      }
+    }).catch(e => {
+      console.error('ストレージデータ取得リクエストエラー:', e);
+    });
+
     const messageListener = (message: any) => {
+      console.log('UI がメッセージを受信:', message.action);
       if (message.action === 'rlsCheckResult') {
+        console.log('RLSチェック結果を受信:', {
+          成功: message.success,
+          テーブル数: message.disabledTables?.length || 0
+        });
         setChecking(false)
         setResult(message)
+        console.log('UI状態を更新: チェック完了');
       }
     }
-    
+
+    console.log('メッセージリスナーを登録');
     chrome.runtime.onMessage.addListener(messageListener)
-    return () => chrome.runtime.onMessage.removeListener(messageListener)
+
+    return () => {
+      console.log('UI コンポーネントがアンマウントされます');
+      chrome.runtime.onMessage.removeListener(messageListener);
+      console.log('メッセージリスナーを削除');
+    }
   }, [])
 
   const removePopup = () => {
+    console.log('ポップアップを削除します');
     const popupContainer = document.getElementById('supabase-rls-checker-popup');
     if (popupContainer) {
       document.body.removeChild(popupContainer);
+      console.log('ポップアップが削除されました');
+    } else {
+      console.warn('ポップアップ要素が見つかりません');
     }
   }
 
   const execute = () => {
-    if (!url||!key) return;
+    if (!url || !key) {
+      console.warn('URLまたはAPIキーが設定されていません');
+      return;
+    }
+    console.log('RLSチェックを実行します');
+    console.log('チェック対象テーブル数:', TABLES.length);
     setChecking(true)
     setResult(null)
-    chrome.runtime.sendMessage({ action:'execute', supabaseUrl:url, supabaseKey:key, tables:TABLES });
+    console.log('UI状態を更新: チェック中');
+
+    chrome.runtime.sendMessage({
+      action: 'execute',
+      supabaseUrl: url,
+      supabaseKey: key,
+      tables: TABLES
+    });
+    console.log('バックグラウンドスクリプトにメッセージを送信しました');
   }
-  
+
   const cancel = () => {
-    chrome.storage.session.set({ rlsPrompted: true });
+    console.log('ユーザーがキャンセルしました');
+    // バックグラウンドスクリプトにメッセージを送信してストレージ操作を依頼
+    chrome.runtime.sendMessage({
+      action: 'setRlsPrompted',
+      value: true
+    }).then(() => {
+      console.log('rlsPrompted フラグ設定リクエストを送信しました');
+    }).catch(e => {
+      console.error('rlsPrompted フラグ設定リクエスト送信エラー:', e);
+    });
     removePopup();
   }
 
@@ -91,15 +141,16 @@ const App = () => {
     if (checking) {
       return (
         <>
-          <div style={{ marginBottom: '8px', fontWeight: 'bold' }}>
+          <div style={{ marginBottom: '8px', fontWeight: 'bold', color: '#ED8936' }}>
             RLSチェック中...
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button 
+            <button
               onClick={cancel}
               style={{
                 padding: '4px 8px',
                 backgroundColor: '#f5f5f5',
+                color: '#333',
                 border: '1px solid #ddd',
                 borderRadius: '3px',
                 cursor: 'pointer',
@@ -112,33 +163,86 @@ const App = () => {
         </>
       )
     }
-    
+
     if (result) {
       return (
         <>
-          <div style={{ marginBottom: '8px', fontWeight: 'bold' }}>
+          <div style={{ marginBottom: '8px', fontWeight: 'bold', color: result.success ? '#3ECF8E' : '#E53E3E' }}>
             {result.success ? 'RLSチェック結果' : 'エラー'}
           </div>
           <div style={{ marginBottom: '8px', fontSize: '11px', maxHeight: '80px', overflowY: 'auto' }}>
             {result.success ? (
               result.disabledTables && result.disabledTables.length > 0 ? (
                 <>
-                  <div>RLS無効テーブル:</div>
+                  <div style={{ color: '#E53E3E' }}>RLS無効テーブル:</div>
                   <ul style={{ margin: '4px 0', paddingLeft: '16px' }}>
                     {result.disabledTables.map((item: any, i: number) => (
-                      <li key={i}>{item.table}</li>
+                      <li key={i} style={{ color: '#555' }}>{item.table}</li>
                     ))}
                   </ul>
                 </>
-              ) : '全テーブルでRLSが有効です'
-            ) : `${result.error}`}
+              ) : <span style={{ color: '#3ECF8E' }}>全テーブルでRLSが有効です</span>
+            ) : <span style={{ color: '#E53E3E' }}>{result.error}</span>}
+          </div>
+          <div style={{ marginBottom: '8px', fontSize: '10px', borderTop: '1px solid #eee', paddingTop: '4px' }}>
+            <div style={{ marginBottom: '2px' }}>
+              <span style={{ fontWeight: 'bold', color: '#333' }}>URL:</span>
+              <span style={{ wordBreak: 'break-all', color: '#333' }}>{url}</span>
+            </div>
+            <div style={{ marginBottom: '2px' }}>
+              <span style={{ fontWeight: 'bold', color: '#333' }}>Key:</span>
+              <span style={{ wordBreak: 'break-all', color: '#333' }}>
+                {key ? `${key.substring(0, 4)}...` : ''}
+              </span>
+              <button
+                onClick={() => {
+                  if (key) {
+                    navigator.clipboard.writeText(key)
+                      .then(() => {
+                        // Optional: Show a temporary success message
+                        const btn = document.activeElement as HTMLButtonElement;
+                        const originalText = btn.innerText;
+                        btn.innerText = 'コピー済';
+                        setTimeout(() => {
+                          btn.innerText = originalText;
+                        }, 1000);
+                      })
+                      .catch(err => console.error('コピーに失敗しました:', err));
+                  }
+                }}
+                style={{
+                  marginLeft: '4px',
+                  padding: '0px 4px',
+                  backgroundColor: '#f0f0f0',
+                  color: '#555',
+                  border: '1px solid #ddd',
+                  borderRadius: '2px',
+                  cursor: 'pointer',
+                  fontSize: '9px',
+                  verticalAlign: 'middle'
+                }}
+              >
+                コピー
+              </button>
+            </div>
+            <div>
+              <a
+                href="https://supabase-client-playground.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#3ECF8E', textDecoration: 'none', fontSize: '10px' }}
+              >
+                Supabase Client Playground
+              </a>
+            </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button 
+            <button
               onClick={removePopup}
               style={{
                 padding: '4px 8px',
                 backgroundColor: '#f5f5f5',
+                color: '#333',
                 border: '1px solid #ddd',
                 borderRadius: '3px',
                 cursor: 'pointer',
@@ -151,14 +255,14 @@ const App = () => {
         </>
       )
     }
-    
+
     return (
       <>
-        <div style={{ marginBottom: '8px', fontWeight: 'bold' }}>
+        <div style={{ marginBottom: '8px', fontWeight: 'bold', color: '#333' }}>
           RLSのチェックを行いますか？
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '5px' }}>
-          <button 
+          <button
             onClick={execute}
             style={{
               padding: '4px 8px',
@@ -172,9 +276,10 @@ const App = () => {
           >
             実行
           </button>
-          <button 
+          <button
             onClick={cancel}
             style={{
+              color: '#333',
               padding: '4px 8px',
               backgroundColor: '#f5f5f5',
               border: '1px solid #ddd',
@@ -210,7 +315,16 @@ const App = () => {
   );
 }
 
-const container = document.createElement('div');
-container.id = 'supabase-rls-checker-popup';
-document.body.appendChild(container);
-createRoot(container).render(<App />);
+// 既存のポップアップをチェック
+let container = document.getElementById('supabase-rls-checker-popup');
+
+// 存在しない場合のみ新しく作成
+if (!container) {
+  console.log('ポップアップを新規作成します');
+  container = document.createElement('div');
+  container.id = 'supabase-rls-checker-popup';
+  document.body.appendChild(container);
+  createRoot(container).render(<App />);
+} else {
+  console.log('既存のポップアップが見つかりました。重複作成をスキップします');
+}

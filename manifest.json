@@ -3,7 +3,7 @@
   "name": "Supabase RLS チェッカー",
   "version": "1.0.0",
   "permissions": ["webRequest", "storage", "scripting"],
-  "host_permissions": ["*://*.supabase.co/*"],
+  "host_permissions": ["<all_urls>"],
   "background": { "service_worker": "src/background.js" },
   "content_scripts": [{
     "matches": ["<all_urls>"],
