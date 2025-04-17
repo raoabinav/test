@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
+import { buttonStyles } from '../common/utils'
 
 export const TABLES = [
   'users',                 // 基本ユーザー情報（メールアドレス、名前）
@@ -118,15 +119,7 @@ const App = () => {
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button
               onClick={cancel}
-              style={{
-                padding: '4px 8px',
-                backgroundColor: '#f5f5f5',
-                color: '#333',
-                border: '1px solid #ddd',
-                borderRadius: '3px',
-                cursor: 'pointer',
-                fontSize: '12px'
-              }}
+              style={buttonStyles.secondary}
             >
               閉じる
             </button>
@@ -180,17 +173,7 @@ const App = () => {
                       .catch(() => {});
                   }
                 }}
-                style={{
-                  marginLeft: '4px',
-                  padding: '0px 4px',
-                  backgroundColor: '#f0f0f0',
-                  color: '#555',
-                  border: '1px solid #ddd',
-                  borderRadius: '2px',
-                  cursor: 'pointer',
-                  fontSize: '9px',
-                  verticalAlign: 'middle'
-                }}
+                style={buttonStyles.small}
               >
                 コピー
               </button>
@@ -209,15 +192,7 @@ const App = () => {
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button
               onClick={removePopup}
-              style={{
-                padding: '4px 8px',
-                backgroundColor: '#f5f5f5',
-                color: '#333',
-                border: '1px solid #ddd',
-                borderRadius: '3px',
-                cursor: 'pointer',
-                fontSize: '12px'
-              }}
+              style={buttonStyles.secondary}
             >
               閉じる
             </button>
@@ -234,29 +209,13 @@ const App = () => {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '5px' }}>
           <button
             onClick={execute}
-            style={{
-              padding: '4px 8px',
-              backgroundColor: '#3ECF8E',
-              color: 'white',
-              border: 'none',
-              borderRadius: '3px',
-              cursor: 'pointer',
-              fontSize: '12px'
-            }}
+            style={buttonStyles.primary}
           >
             実行
           </button>
           <button
             onClick={cancel}
-            style={{
-              color: '#333',
-              padding: '4px 8px',
-              backgroundColor: '#f5f5f5',
-              border: '1px solid #ddd',
-              borderRadius: '3px',
-              cursor: 'pointer',
-              fontSize: '12px'
-            }}
+            style={buttonStyles.secondary}
           >
             キャンセル
           </button>
