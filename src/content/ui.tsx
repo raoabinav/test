@@ -63,7 +63,7 @@ const App = () => {
         setUrl(response.supabaseUrl);
         setKey(response.supabaseKey);
       }
-    }).catch(() => {});
+    }).catch(() => { });
 
     const messageListener = (message: any) => {
       if (message.action === 'rlsCheckResult') {
@@ -105,7 +105,7 @@ const App = () => {
     chrome.runtime.sendMessage({
       action: 'setRlsPrompted',
       value: true
-    }).catch(() => {});
+    }).catch(() => { });
     removePopup();
   }
 
@@ -141,53 +141,16 @@ const App = () => {
                   <div style={{ color: '#E53E3E' }}>RLS無効テーブル:</div>
                   <ul style={{ margin: '4px 0', paddingLeft: '16px' }}>
                     {result.disabledTables.map((item: any, i: number) => (
-                      <li key={i} style={{ color: '#555' }}>{item.table}</li>
+                      <li key={i} style={{ color: '#555',listStyleType: 'disc' }}>
+                        <a href={`https://supabase-client-playground-six.vercel.app/?supabaseUrl=${url}&supabaseKey=${key}&query=supabase.from('${item.table}').select()`} target='_blank' rel="noopener noreferrer" style={{ color: '#3ECF8E', textDecoration: 'none' }}>
+                          {item.table} 🚀
+                        </a>
+                      </li>
                     ))}
                   </ul>
                 </>
               ) : <span style={{ color: '#3ECF8E' }}>全テーブルでRLSが有効です</span>
             ) : <span style={{ color: '#E53E3E' }}>{result.error}</span>}
-          </div>
-          <div style={{ marginBottom: '8px', fontSize: '10px', borderTop: '1px solid #eee', paddingTop: '4px' }}>
-            <div style={{ marginBottom: '2px' }}>
-              <span style={{ fontWeight: 'bold', color: '#333' }}>URL:</span>
-              <span style={{ wordBreak: 'break-all', color: '#333' }}>{url}</span>
-            </div>
-            <div style={{ marginBottom: '2px' }}>
-              <span style={{ fontWeight: 'bold', color: '#333' }}>Key:</span>
-              <span style={{ wordBreak: 'break-all', color: '#333' }}>
-                {key ? `${key.substring(0, 4)}...` : ''}
-              </span>
-              <button
-                onClick={() => {
-                  if (key) {
-                    navigator.clipboard.writeText(key)
-                      .then(() => {
-                        const btn = document.activeElement as HTMLButtonElement;
-                        const originalText = btn.innerText;
-                        btn.innerText = 'コピー済';
-                        setTimeout(() => {
-                          btn.innerText = originalText;
-                        }, 1000);
-                      })
-                      .catch(() => {});
-                  }
-                }}
-                style={buttonStyles.small}
-              >
-                コピー
-              </button>
-            </div>
-            <div>
-              <a
-                href="https://supabase-client-playground.vercel.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: '#3ECF8E', textDecoration: 'none', fontSize: '10px' }}
-              >
-                Supabase Client Playground
-              </a>
-            </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button
