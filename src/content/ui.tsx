@@ -1,17 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { buttonStyles } from '../common/utils'
+import { buttonStyles, logError } from '../common/utils'
+import { RlsCheckResult, RlsCheckResultMessage } from '../common/types'
 
 
 const App = () => {
   const [url, setUrl] = useState<string | undefined>()
   const [key, setKey] = useState<string | undefined>()
   const [checking, setChecking] = useState(false)
-  const [result, setResult] = useState<{
-    success: boolean;
-    disabledTables?: any[];
-    error?: string;
-  } | null>(null)
+  const [result, setResult] = useState<RlsCheckResultMessage | null>(null)
 
   useEffect(() => {
     chrome.runtime.sendMessage({
@@ -21,9 +18,9 @@ const App = () => {
         setUrl(response.supabaseUrl);
         setKey(response.supabaseKey);
       }
-    }).catch(() => { });
+    }).catch(error => logError(error, 'Get Supabase Data'));
 
-    const messageListener = (message: any) => {
+    const messageListener = (message: RlsCheckResultMessage) => {
       if (message.action === 'rlsCheckResult') {
         setChecking(false)
         setResult(message)
@@ -62,7 +59,7 @@ const App = () => {
     chrome.runtime.sendMessage({
       action: 'setRlsPrompted',
       value: true
-    }).catch(() => { });
+    }).catch(error => logError(error, 'Set RLS Prompted'));
     removePopup();
   }
 
@@ -97,7 +94,7 @@ const App = () => {
                 <>
                   <div style={{ color: '#E53E3E' }}>Tables with RLS disabled:</div>
                   <ul style={{ margin: '4px 0', paddingLeft: '16px' }}>
-                    {result.disabledTables.map((item: any, i: number) => (
+                    {result.disabledTables?.map((item: RlsCheckResult, i: number) => (
                       <li key={i} style={{ color: '#555', listStyleType: 'disc' }}>
                         <a href={`https://supabase-client-playground-six.vercel.app/?supabaseUrl=${url}&supabaseKey=${key}&query=supabase.from('${item.table}').select()`} target='_blank' rel="noopener noreferrer" style={{ color: '#3ECF8E', textDecoration: 'none' }}>
                           {item.table} 🚀

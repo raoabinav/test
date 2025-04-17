@@ -79,3 +79,14 @@ export const buttonStyles = {
     verticalAlign: 'middle'
   }
 };
+
+/**
+ * Log errors to console in a consistent way
+ * @param error Error object or string
+ * @param context Optional context information
+ */
+export function logError(error: unknown, context?: string): void {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  const contextPrefix = context ? `[${context}] ` : '';
+  console.error(`${contextPrefix}Error: ${errorMessage}`);
+}

@@ -1,5 +1,39 @@
 import { checkRls } from './common/rlsChecker'
-import { decodeJwtAndGetProjectRef } from './common/utils'
+import { decodeJwtAndGetProjectRef, logError } from './common/utils'
+import { RlsCheckResult, SupabaseRequestDetectedMessage, GetSupabaseDataMessage, SetRlsPromptedMessage, ExecuteMessage, RlsCheckResultMessage } from './common/types'
+
+/**
+ * Process Supabase API key and set session storage
+ * @param apiKey Supabase API key
+ * @param tabId Optional tab ID to execute script
+ * @returns Success status
+ */
+function processSupabaseKey(apiKey: string, tabId?: number): boolean {
+  if (!apiKey) {
+    return false;
+  }
+
+  try {
+    const { projectRef } = decodeJwtAndGetProjectRef(apiKey);
+    const supabaseUrl = `https://${projectRef}.supabase.co`;
+    
+    chrome.storage.session.set({ supabaseUrl, supabaseKey: apiKey }).then(() => {
+      chrome.storage.session.get('rlsPrompted').then(({ rlsPrompted }) => {
+        if (!rlsPrompted && tabId) {
+          chrome.scripting.executeScript({
+            target: { tabId },
+            files: ['src/content/ui.js']
+          }).catch(error => logError(error, 'Script Execution'));
+        }
+      }).catch(error => logError(error, 'Storage Get'));
+    }).catch(error => logError(error, 'Storage Set'));
+    return true;
+  }
+  catch (error) {
+    logError(error, 'JWT Decode');
+    return false;
+  }
+}
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
   (info) => {
@@ -8,29 +42,9 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
         h.name.toLowerCase() === 'apikey'
       )?.value;
 
-      if (!apiKeyHeader) {
-        return;
+      if (apiKeyHeader) {
+        processSupabaseKey(apiKeyHeader, info.tabId);
       }
-
-      try {
-        const { projectRef } = decodeJwtAndGetProjectRef(apiKeyHeader);
-        const supabaseUrl = `https://${projectRef}.supabase.co`;
-        
-        chrome.storage.session.set({ supabaseUrl, supabaseKey: apiKeyHeader }).then(() => {
-          chrome.storage.session.get('rlsPrompted').then(({ rlsPrompted }) => {
-            if (!rlsPrompted && info.tabId) {
-              chrome.scripting.executeScript({
-                target: { tabId: info.tabId },
-                files: ['src/content/ui.js']
-              }).catch(() => {});
-            }
-          });
-        }).catch(() => {});
-      }
-      catch (e) {
-        return;
-      }
-
       return;
     } else {
       return;
@@ -64,34 +78,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 
   if (msg.action === 'supabaseRequestDetected') {
-    if (!msg.apiKey) {
-      return;
+    const request = msg as SupabaseRequestDetectedMessage;
+    if (sender.tab && sender.tab.id) {
+      processSupabaseKey(request.apiKey, sender.tab.id);
     }
-
-    try {
-      const { projectRef } = decodeJwtAndGetProjectRef(msg.apiKey);
-      const supabaseUrl = `https://${projectRef}.supabase.co`;
-      
-      chrome.storage.session.set({ supabaseUrl, supabaseKey: msg.apiKey }).then(() => {
-        chrome.storage.session.get('rlsPrompted').then(({ rlsPrompted }) => {
-          if (!rlsPrompted && sender.tab && sender.tab.id) {
-            chrome.scripting.executeScript({
-              target: { tabId: sender.tab.id },
-              files: ['src/content/ui.js']
-            }).catch(() => {});
-          }
-        });
-      }).catch(() => {});
-    }
-    catch (e) {
-      return;
-    }
-
     return;
   }
 
   if (msg.action === 'execute') {
-    checkRls(msg.supabaseKey)
+    const request = msg as ExecuteMessage;
+    checkRls(request.supabaseKey)
       .then(results => {
         const disabledTables = results.filter(r => r.rlsDisabled);
 
@@ -100,19 +96,22 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             action: 'rlsCheckResult',
             disabledTables,
             success: true
-          }).catch(() => {});
+          } as RlsCheckResultMessage).catch(error => logError(error, 'Send Result'));
         }
       })
-      .catch(e => {
+      .catch(error => {
+        logError(error, 'RLS Check');
         if (sender.tab && sender.tab.id) {
           chrome.tabs.sendMessage(sender.tab.id, {
             action: 'rlsCheckResult',
-            error: (e as Error).message,
+            error: error instanceof Error ? error.message : String(error),
             success: false
-          }).catch(() => {});
+          } as RlsCheckResultMessage).catch(err => logError(err, 'Send Error'));
         }
       });
 
     return true;
   }
+  
+  return true;
 });
