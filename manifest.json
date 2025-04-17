@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Supabase RLS チェッカー",
+  "version": "1.0.0",
+  "permissions": ["webRequest", "storage", "scripting"],
+  "host_permissions": ["*://*.supabase.co/*"],
+  "background": { "service_worker": "src/background.js" },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["src/content/detector.js"],
+    "run_at": "document_start"
+  }]
+}

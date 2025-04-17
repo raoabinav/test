@@ -1,0 +1,25 @@
+{
+  "name": "supabase-rls-checker",
+  "version": "1.0.0",
+  "description": "Chrome extension to check Supabase RLS settings",
+  "scripts": {
+    "build": "tsc && webpack",
+    "dev": "webpack --watch"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.4",
+    "jwt-decode": "^3.1.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.246",
+    "@types/react": "^18.3.20",
+    "@types/react-dom": "^18.3.6",
+    "copy-webpack-plugin": "^11.0.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.1.6",
+    "webpack": "^5.99.5",
+    "webpack-cli": "^5.1.4"
+  }
+}
