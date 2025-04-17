@@ -1,53 +1,35 @@
 import { checkRls } from './common/rlsChecker'
-import jwtDecode from 'jwt-decode';
-
-interface JwtPayload {
-  ref?: string;
-  exp: number;
-  sub?: string;
-  iss?: string;
-  [key: string]: any;
-}
+import { decodeJwtAndGetProjectRef, cleanApiKey } from './common/utils'
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
   (info) => {
     if (info.url.includes('.supabase.co/rest/v1/')) {
-      const cleanApiKey = info.requestHeaders?.find(h =>
+      const apiKeyHeader = info.requestHeaders?.find(h =>
         h.name.toLowerCase() === 'apikey'
       )?.value;
 
-      if (!cleanApiKey) {
+      if (!apiKeyHeader) {
         return;
       }
 
-      let payload: JwtPayload;
-      let projectRef: string | undefined;
-
       try {
-        payload = jwtDecode(cleanApiKey);
-        projectRef = payload.ref ||
-          (payload.sub ? payload.sub.split(':')?.[0] : undefined) ||
-          (payload.iss ? payload.iss.split('/')?.[3] : undefined);
-
-        if (!projectRef) {
-          return;
-        }
+        const { projectRef, payload } = decodeJwtAndGetProjectRef(apiKeyHeader);
+        const supabaseUrl = `https://${projectRef}.supabase.co`;
+        
+        chrome.storage.session.set({ supabaseUrl, supabaseKey: apiKeyHeader }).then(() => {
+          chrome.storage.session.get('rlsPrompted').then(({ rlsPrompted }) => {
+            if (!rlsPrompted && info.tabId) {
+              chrome.scripting.executeScript({
+                target: { tabId: info.tabId },
+                files: ['src/content/ui.js']
+              }).catch(() => {});
+            }
+          });
+        }).catch(() => {});
       }
       catch (e) {
         return;
       }
-
-      const supabaseUrl = `https://${projectRef}.supabase.co`;
-      chrome.storage.session.set({ supabaseUrl, supabaseKey: cleanApiKey }).then(() => {
-        chrome.storage.session.get('rlsPrompted').then(({ rlsPrompted }) => {
-          if (!rlsPrompted && info.tabId) {
-            chrome.scripting.executeScript({
-              target: { tabId: info.tabId },
-              files: ['src/content/ui.js']
-            }).catch(() => {});
-          }
-        });
-      }).catch(() => {});
 
       return;
     } else {
@@ -86,34 +68,24 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       return;
     }
 
-    let payload: JwtPayload;
-    let projectRef: string | undefined;
-
     try {
-      payload = jwtDecode(msg.apiKey);
-      projectRef = payload.ref ||
-        (payload.sub ? payload.sub.split(':')?.[0] : undefined) ||
-        (payload.iss ? payload.iss.split('/')?.[3] : undefined);
-
-      if (!projectRef) {
-        return;
-      }
+      const { projectRef, payload } = decodeJwtAndGetProjectRef(msg.apiKey);
+      const supabaseUrl = `https://${projectRef}.supabase.co`;
+      
+      chrome.storage.session.set({ supabaseUrl, supabaseKey: msg.apiKey }).then(() => {
+        chrome.storage.session.get('rlsPrompted').then(({ rlsPrompted }) => {
+          if (!rlsPrompted && sender.tab && sender.tab.id) {
+            chrome.scripting.executeScript({
+              target: { tabId: sender.tab.id },
+              files: ['src/content/ui.js']
+            }).catch(() => {});
+          }
+        });
+      }).catch(() => {});
     }
     catch (e) {
       return;
     }
-
-    const supabaseUrl = `https://${projectRef}.supabase.co`;
-    chrome.storage.session.set({ supabaseUrl, supabaseKey: msg.apiKey }).then(() => {
-      chrome.storage.session.get('rlsPrompted').then(({ rlsPrompted }) => {
-        if (!rlsPrompted && sender.tab && sender.tab.id) {
-          chrome.scripting.executeScript({
-            target: { tabId: sender.tab.id },
-            files: ['src/content/ui.js']
-          }).catch(() => {});
-        }
-      });
-    }).catch(() => {});
 
     return;
   }

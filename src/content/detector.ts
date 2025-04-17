@@ -1,4 +1,6 @@
 // コンテンツスクリプトでSupabaseリクエストを検知する機能
+import { cleanApiKey } from '../common/utils';
+
 const supabaseElements = document.querySelectorAll('[data-supabase]');
 
 // Fetch APIをインターセプトしてSupabaseリクエストを検知
@@ -20,14 +22,13 @@ window.fetch = function(input: RequestInfo | URL, init?: RequestInit) {
     }
     
     if (apiKey) {
-      // "Bearer "プレフィックスを削除
-      const cleanApiKey = apiKey.startsWith('Bearer ') ? apiKey.substring(7) : apiKey;
+      const apiKeyValue = cleanApiKey(apiKey);
       
       // バックグラウンドスクリプトに通知
       chrome.runtime.sendMessage({
         action: 'supabaseRequestDetected',
         url,
-        apiKey: cleanApiKey
+        apiKey: apiKeyValue
       });
     }
   }
@@ -61,14 +62,13 @@ XMLHttpRequest.prototype.setRequestHeader = function(name: string, value: string
       (this as any)._supabaseUrl && 
       (this as any)._supabaseUrl.includes('.supabase.co/rest/v1/')) {
     
-    // "Bearer "プレフィックスを削除
-    const cleanApiKey = value.startsWith('Bearer ') ? value.substring(7) : value;
+    const apiKeyValue = cleanApiKey(value);
     
     // バックグラウンドスクリプトに通知
     chrome.runtime.sendMessage({
       action: 'supabaseRequestDetected',
       url: (this as any)._supabaseUrl,
-      apiKey: cleanApiKey
+      apiKey: apiKeyValue
     });
   }
   
