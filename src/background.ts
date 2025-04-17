@@ -20,10 +20,25 @@ function processSupabaseKey(apiKey: string, tabId?: number): boolean {
     chrome.storage.session.set({ supabaseUrl, supabaseKey: apiKey }).then(() => {
       chrome.storage.session.get('rlsPrompted').then(({ rlsPrompted }) => {
         if (!rlsPrompted && tabId) {
-          chrome.scripting.executeScript({
-            target: { tabId },
-            files: ['src/content/ui.js']
-          }).catch(error => logError(error, 'Script Execution'));
+          try {
+            chrome.tabs.get(tabId, (tab) => {
+              if (chrome.runtime.lastError) {
+                logError(chrome.runtime.lastError, 'Tab Get');
+                return; 
+              }
+              
+              const currentUrl = tab.url || '';
+              // supabase-client-playground-six.vercel.app ではポップアップを表示しない
+              if (!currentUrl.includes('supabase-client-playground-six.vercel.app')) {
+                chrome.scripting.executeScript({
+                  target: { tabId },
+                  files: ['src/content/ui.js']
+                }).catch((error: Error) => logError(error, 'Script Execution'));
+              }
+            });
+          } catch (error) {
+            logError(error as Error, 'Tab Get Exception');
+          }
         }
       }).catch(error => logError(error, 'Storage Get'));
     }).catch(error => logError(error, 'Storage Set'));
