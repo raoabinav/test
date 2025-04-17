@@ -1,12 +1,8 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { JwtPayload, decodeJwtAndGetProjectRef, isTokenExpired } from './utils';
+import { JwtPayload, decodeJwtAndGetProjectRef, isTokenExpired, logError } from './utils';
 import { TABLES } from './constants';
+import { RlsCheckResult } from './types';
 
-interface RlsCheckResult {
-  table: string;
-  rlsDisabled: boolean;
-  errorMessage?: string;
-}
 
 /**
  * Function to check RLS for a single table
@@ -23,8 +19,9 @@ async function checkTableRls(supabase: SupabaseClient, table: string): Promise<R
     }
 
     return { table, rlsDisabled: false };
-  } catch (e) {
-    return { table, rlsDisabled: false, errorMessage: `Exception: ${(e as Error).message}` };
+  } catch (error) {
+    logError(error, `Check Table: ${table}`);
+    return { table, rlsDisabled: false, errorMessage: `Exception: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 

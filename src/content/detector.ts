@@ -1,4 +1,10 @@
-import { cleanApiKey } from '../common/utils';
+import { cleanApiKey, logError } from '../common/utils';
+import { SupabaseRequestDetectedMessage, RlsCheckResultMessage } from '../common/types';
+
+// XMLHttpRequestを拡張するためのインターフェース
+interface SupabaseXmlHttpRequest extends XMLHttpRequest {
+  _supabaseUrl?: string;
+}
 
 const originalFetch = window.fetch;
 window.fetch = function(input: RequestInfo | URL, init?: RequestInit) {
@@ -41,7 +47,7 @@ XMLHttpRequest.prototype.open = function(
 ) {
   const urlString = url.toString();
   
-  (this as any)._supabaseUrl = urlString;
+  (this as SupabaseXmlHttpRequest)._supabaseUrl = urlString;
   
   return originalXhrOpen.call(this, method, url, async, username, password);
 };
@@ -49,22 +55,22 @@ XMLHttpRequest.prototype.open = function(
 const originalXhrSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
 XMLHttpRequest.prototype.setRequestHeader = function(name: string, value: string) {
   if ((name.toLowerCase() === 'apikey' || name.toLowerCase() === 'authorization') && 
-      (this as any)._supabaseUrl && 
-      (this as any)._supabaseUrl.includes('.supabase.co/')) {
+      (this as SupabaseXmlHttpRequest)._supabaseUrl && 
+      (this as SupabaseXmlHttpRequest)._supabaseUrl?.includes('.supabase.co/')) {
     
     const apiKeyValue = cleanApiKey(value);
     
     chrome.runtime.sendMessage({
       action: 'supabaseRequestDetected',
-      url: (this as any)._supabaseUrl,
+      url: (this as SupabaseXmlHttpRequest)._supabaseUrl || '',
       apiKey: apiKeyValue
-    });
+    } as SupabaseRequestDetectedMessage);
   }
   
   return originalXhrSetRequestHeader.apply(this, [name, value]);
 };
 
-chrome.runtime.onMessage.addListener((message) => {
+chrome.runtime.onMessage.addListener((message: RlsCheckResultMessage) => {
   if (message.action === 'rlsCheckResult') {
   }
 });
