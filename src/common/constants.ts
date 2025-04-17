@@ -1,41 +1,41 @@
 export const TABLES = [
-    'users',                 // 基本ユーザー情報（メールアドレス、名前）
-    'profiles',              // プロフィール詳細（住所、電話番号、生年月日）
-    'customers',             // 顧客マスタ（連絡先、請求先情報）
-    'orders',                // 注文情報（注文者の氏名・住所）
-    'order_items',           // 注文内訳（商品情報と紐づく顧客注文）
-    'payments',              // 支払い情報（クレジットカード末尾、取引ID）
-    'payment_methods',       // ユーザーの支払い手段（カード情報の一部）
-    'credit_cards',          // クレジットカード詳細（トークン化された情報）
-    'addresses',             // 住所情報（配送先／請求先）
-    'shipping_addresses',    // 配送専用住所
-    'billing_addresses',     // 請求専用住所
-    'invoices',              // 請求書（請求先・金額・発行日）
-    'invoice_items',         // 請求書明細
-    'subscriptions',         // サブスクリプション履歴（ユーザーID、プラン、支払い情報）
-    'transactions',          // 金銭取引ログ（取引ID、金額）
-    'sessions',              // セッション管理（ログイン履歴、IPアドレス）
-    'login_attempts',        // ログイン試行履歴（日時、結果、IPアドレス）
-    'oauth_tokens',          // OAuth トークン（アクセストークン、リフレッシュトークン）
-    'api_keys',              // API キー管理
-    'security_questions',    // セキュリティ質問と回答
-    'employees',             // 社員情報（社員ID、住所、緊急連絡先）
-    'employee_records',      // 人事記録（給与、評価）
-    'payroll',               // 給与データ（銀行口座、税情報）
-    'tax_records',           // 税務データ（納税者番号、申告情報）
-    'medical_records',       // 医療記録（診断、処方）
-    'insurance_claims',      // 保険請求情報（保険番号、症状）
-    'contacts',              // 問い合わせ履歴（氏名、メール、電話）
-    'support_tickets',       // サポートチケット（ユーザー情報と問い合わせ内容）
-    'messages',              // メッセージ履歴（送信者・受信者・内容）
-    'chat_threads',          // チャットスレッド（参加ユーザー）
-    'feedback',              // ユーザーフィードバック（氏名、連絡先）
-    'reviews',               // レビュー（レビュワー情報）
-    'comments',              // コメント（投稿者アカウント）
-    'leads',                 // 見込み客情報（氏名、企業、連絡先）
-    'newsletter_subscribers',// メルマガ登録者
-    'event_registrations',   // イベント申込情報（参加者情報、連絡先）
-    'attendees',             // イベント参加者一覧
-    'vendors',               // 取引先（会社名、住所、連絡先）
-    'partners',              // パートナー情報（担当者連絡先）
+    'users',                 // Basic user information (email, name)
+    'profiles',              // Profile details (address, phone number, date of birth)
+    'customers',             // Customer master (contact info, billing information)
+    'orders',                // Order information (customer name, address)
+    'order_items',           // Order details (product information linked to customer orders)
+    'payments',              // Payment information (credit card last digits, transaction ID)
+    'payment_methods',       // User payment methods (partial card information)
+    'credit_cards',          // Credit card details (tokenized information)
+    'addresses',             // Address information (shipping/billing)
+    'shipping_addresses',    // Shipping-only addresses
+    'billing_addresses',     // Billing-only addresses
+    'invoices',              // Invoices (billing info, amount, issue date)
+    'invoice_items',         // Invoice line items
+    'subscriptions',         // Subscription history (user ID, plan, payment info)
+    'transactions',          // Financial transaction log (transaction ID, amount)
+    'sessions',              // Session management (login history, IP address)
+    'login_attempts',        // Login attempt history (date/time, result, IP address)
+    'oauth_tokens',          // OAuth tokens (access token, refresh token)
+    'api_keys',              // API key management
+    'security_questions',    // Security questions and answers
+    'employees',             // Employee information (employee ID, address, emergency contact)
+    'employee_records',      // HR records (salary, evaluations)
+    'payroll',               // Payroll data (bank account, tax information)
+    'tax_records',           // Tax data (taxpayer number, filing information)
+    'medical_records',       // Medical records (diagnoses, prescriptions)
+    'insurance_claims',      // Insurance claim information (policy number, symptoms)
+    'contacts',              // Contact history (name, email, phone)
+    'support_tickets',       // Support tickets (user information and inquiry content)
+    'messages',              // Message history (sender, recipient, content)
+    'chat_threads',          // Chat threads (participating users)
+    'feedback',              // User feedback (name, contact info)
+    'reviews',               // Reviews (reviewer information)
+    'comments',              // Comments (poster account)
+    'leads',                 // Lead information (name, company, contact info)
+    'newsletter_subscribers',// Newsletter subscribers
+    'event_registrations',   // Event registration information (participant info, contact)
+    'attendees',             // Event attendee list
+    'vendors',               // Vendors (company name, address, contact info)
+    'partners',              // Partner information (contact person details)
   ];
