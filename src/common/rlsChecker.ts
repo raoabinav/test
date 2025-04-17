@@ -17,7 +17,6 @@ export interface RlsCheckResult {
 }
 
 export async function checkRls(
-  supabaseUrl: string,
   supabaseKey: string,
   tables: string[]
 ): Promise<RlsCheckResult[]> {

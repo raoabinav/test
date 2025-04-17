@@ -185,7 +185,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     });
 
     // 非同期処理を開始
-    checkRls(msg.supabaseUrl, msg.supabaseKey, msg.tables)
+    checkRls(msg.supabaseKey, msg.tables)
       .then(results => {
         console.log('RLSチェック完了:', results.length, '件のテーブルをチェックしました');
 
