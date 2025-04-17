@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Supabase RLS チェッカー",
+  "name": "Supabase RLS Checker",
   "version": "1.0.0",
   "permissions": ["webRequest", "storage", "scripting"],
   "host_permissions": ["<all_urls>"],

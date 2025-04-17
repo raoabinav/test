@@ -16,7 +16,7 @@ Supabase RLS Checker is a Chrome extension that automatically verifies Row Level
    - Automatically removes the `Bearer ` prefix in case of Bearer authentication
 
 3. **RLS Verification Process**:
-   - Uses the extracted API key to verify 39 types of sensitive tables
+   - Uses the extracted API key to verify numerous types of sensitive tables
    - Executes a `select * limit 30` query for each table
    - Determines that RLS protection is disabled if 30 or more records can be retrieved at once
      (properly configured RLS would restrict access to unauthorized data)
@@ -29,7 +29,7 @@ Supabase RLS Checker is a Chrome extension that automatically verifies Row Level
 ## Key Features
 
 - **Automatic Detection**: Automatically detects requests to Supabase and extracts API keys
-- **Comprehensive Checks**: Checks 39 types of tables that may contain personal or confidential information
+- **Comprehensive Checks**: Checks numerous types of tables that may contain personal or confidential information
 - **Real-time Verification**: Detects RLS configuration issues in real-time while browsing websites
 - **Security Alerts**: Provides visual alerts for tables with disabled RLS settings
 - **JWT Verification**: Automatically checks token validity and expiration
@@ -94,49 +94,9 @@ async function checkTableRls(supabase: SupabaseClient, table: string): Promise<R
 
 ## Supported Tables
 
-This extension checks the following 39 types of sensitive tables:
+This extension checks the following numerous types of sensitive tables:
 
-| Table Name | Description |
-|------------|-------------|
-| users | Basic user information (email, name) |
-| profiles | Profile details (address, phone number, date of birth) |
-| customers | Customer master (contact info, billing information) |
-| orders | Order information (customer name and address) |
-| order_items | Order details (product information linked to customer orders) |
-| payments | Payment information (last digits of credit card, transaction ID) |
-| payment_methods | User payment methods (partial card information) |
-| credit_cards | Credit card details (tokenized information) |
-| addresses | Address information (shipping/billing) |
-| shipping_addresses | Shipping-specific addresses |
-| billing_addresses | Billing-specific addresses |
-| invoices | Invoices (billing info, amount, issue date) |
-| invoice_items | Invoice details |
-| subscriptions | Subscription history (user ID, plan, payment information) |
-| transactions | Financial transaction logs (transaction ID, amount) |
-| sessions | Session management (login history, IP address) |
-| login_attempts | Login attempt history (date/time, result, IP address) |
-| oauth_tokens | OAuth tokens (access tokens, refresh tokens) |
-| api_keys | API key management |
-| security_questions | Security questions and answers |
-| employees | Employee information (employee ID, address, emergency contact) |
-| employee_records | HR records (salary, evaluations) |
-| payroll | Payroll data (bank account, tax information) |
-| tax_records | Tax data (taxpayer number, filing information) |
-| medical_records | Medical records (diagnoses, prescriptions) |
-| insurance_claims | Insurance claim information (insurance number, symptoms) |
-| contacts | Contact history (name, email, phone) |
-| support_tickets | Support tickets (user information and inquiry content) |
-| messages | Message history (sender, recipient, content) |
-| chat_threads | Chat threads (participating users) |
-| feedback | User feedback (name, contact information) |
-| reviews | Reviews (reviewer information) |
-| comments | Comments (poster account) |
-| leads | Prospect information (name, company, contact details) |
-| newsletter_subscribers | Newsletter subscribers |
-| event_registrations | Event registration information (participant info, contact details) |
-| attendees | Event participant list |
-| vendors | Business partners (company name, address, contact information) |
-| partners | Partner information (contact person details) |
+See: https://github.com/hand-dot/supabase-rls-check/blob/main/src/common/constants.ts
 
 ## Important Notes
 
