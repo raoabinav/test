@@ -9,9 +9,9 @@ export interface JwtPayload {
 }
 
 /**
- * JWTトークンをデコードしてプロジェクト参照を抽出する
+ * Decode JWT token and extract project reference
  * @param apiKey Supabase API Key
- * @returns プロジェクト参照とデコードされたペイロード
+ * @returns Project reference and decoded payload
  */
 export function decodeJwtAndGetProjectRef(apiKey: string): { projectRef: string; payload: JwtPayload } {
   try {
@@ -21,28 +21,28 @@ export function decodeJwtAndGetProjectRef(apiKey: string): { projectRef: string;
       (payload.iss ? payload.iss.split('/')?.[3] : undefined);
 
     if (!projectRef) {
-      throw new Error('プロジェクト参照を特定できませんでした');
+      throw new Error('Could not identify project reference');
     }
 
     return { projectRef, payload };
   } catch (e) {
-    throw new Error('無効な Supabase API Key');
+    throw new Error('Invalid Supabase API Key');
   }
 }
 
 /**
- * APIキーからBearerプレフィックスを削除する
- * @param apiKey 元のAPIキー
- * @returns クリーンなAPIキー
+ * Remove Bearer prefix from API key
+ * @param apiKey Original API key
+ * @returns Clean API key
  */
 export function cleanApiKey(apiKey: string): string {
   return apiKey.startsWith('Bearer ') ? apiKey.substring(7) : apiKey;
 }
 
 /**
- * JWTトークンの有効期限をチェックする
- * @param payload JWTペイロード
- * @returns 有効期限切れの場合はtrue
+ * Check if JWT token is expired
+ * @param payload JWT payload
+ * @returns true if token is expired
  */
 export function isTokenExpired(payload: JwtPayload): boolean {
   return payload.exp < Date.now() / 1000;

@@ -14,7 +14,6 @@ const App = () => {
   } | null>(null)
 
   useEffect(() => {
-    // バックグラウンドスクリプトにストレージデータ取得をリクエスト
     chrome.runtime.sendMessage({
       action: 'getSupabaseData'
     }).then(response => {
@@ -72,14 +71,14 @@ const App = () => {
       return (
         <>
           <div style={{ marginBottom: '8px', fontWeight: 'bold', color: '#ED8936' }}>
-            RLSチェック中...
+            Checking RLS...
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button
               onClick={cancel}
               style={buttonStyles.secondary}
             >
-              閉じる
+              Close
             </button>
           </div>
         </>
@@ -90,13 +89,13 @@ const App = () => {
       return (
         <>
           <div style={{ marginBottom: '8px', fontWeight: 'bold', color: result.success ? '#3ECF8E' : '#E53E3E' }}>
-            {result.success ? 'RLSチェック結果' : 'エラー'}
+            {result.success ? 'RLS Check Results' : 'Error'}
           </div>
           <div style={{ marginBottom: '8px', fontSize: '11px', maxHeight: '80px', overflowY: 'auto' }}>
             {result.success ? (
               result.disabledTables && result.disabledTables.length > 0 ? (
                 <>
-                  <div style={{ color: '#E53E3E' }}>RLS無効テーブル:</div>
+                  <div style={{ color: '#E53E3E' }}>Tables with RLS disabled:</div>
                   <ul style={{ margin: '4px 0', paddingLeft: '16px' }}>
                     {result.disabledTables.map((item: any, i: number) => (
                       <li key={i} style={{ color: '#555', listStyleType: 'disc' }}>
@@ -107,7 +106,7 @@ const App = () => {
                     ))}
                   </ul>
                 </>
-              ) : <span style={{ color: '#3ECF8E' }}>全テーブルでRLSが有効です</span>
+              ) : <span style={{ color: '#3ECF8E' }}>RLS is enabled for all tables</span>
             ) : <span style={{ color: '#E53E3E' }}>{result.error}</span>}
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -115,7 +114,7 @@ const App = () => {
               onClick={removePopup}
               style={buttonStyles.secondary}
             >
-              閉じる
+              Close
             </button>
           </div>
         </>
@@ -125,20 +124,20 @@ const App = () => {
     return (
       <>
         <div style={{ marginBottom: '8px', fontWeight: 'bold', color: '#333' }}>
-          RLSのチェックを行いますか？
+          Do you want to check RLS?
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '5px' }}>
           <button
             onClick={execute}
             style={buttonStyles.primary}
           >
-            実行
+            Execute
           </button>
           <button
             onClick={cancel}
             style={buttonStyles.secondary}
           >
-            キャンセル
+            Cancel
           </button>
         </div>
       </>

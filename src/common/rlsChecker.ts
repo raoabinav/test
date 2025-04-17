@@ -9,7 +9,7 @@ interface RlsCheckResult {
 }
 
 /**
- * 単一テーブルのRLSチェックを実行する関数
+ * Function to check RLS for a single table
  */
 async function checkTableRls(supabase: SupabaseClient, table: string): Promise<RlsCheckResult> {
   try {
@@ -24,7 +24,7 @@ async function checkTableRls(supabase: SupabaseClient, table: string): Promise<R
 
     return { table, rlsDisabled: false };
   } catch (e) {
-    return { table, rlsDisabled: false, errorMessage: `例外発生: ${(e as Error).message}` };
+    return { table, rlsDisabled: false, errorMessage: `Exception: ${(e as Error).message}` };
   }
 }
 
@@ -37,11 +37,11 @@ export async function checkRls(supabaseKey: string): Promise<RlsCheckResult[]> {
     payload = result.payload;
     projectRef = result.projectRef;
   } catch (e) {
-    throw new Error('無効な Supabase API Key');
+    throw new Error('Invalid Supabase API Key');
   }
 
   if (isTokenExpired(payload)) {
-    throw new Error('API Key 有効期限切れ');
+    throw new Error('API Key expired');
   }
 
   const supabase: SupabaseClient = createClient(`https://${projectRef}.supabase.co`, supabaseKey);
