@@ -1,16 +1,34 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { JwtPayload, decodeJwtAndGetProjectRef, isTokenExpired } from './utils';
+import { TABLES } from './constants';
 
-export interface RlsCheckResult {
+interface RlsCheckResult {
   table: string;
   rlsDisabled: boolean;
   errorMessage?: string;
 }
 
-export async function checkRls(
-  supabaseKey: string,
-  tables: string[]
-): Promise<RlsCheckResult[]> {
+/**
+ * 単一テーブルのRLSチェックを実行する関数
+ */
+async function checkTableRls(supabase: SupabaseClient, table: string): Promise<RlsCheckResult> {
+  try {
+    const { data } = await supabase
+      .from(table)
+      .select('*')
+      .limit(30);
+
+    if (data && data.length >= 30) {
+      return { table, rlsDisabled: true };
+    }
+
+    return { table, rlsDisabled: false };
+  } catch (e) {
+    return { table, rlsDisabled: false, errorMessage: `例外発生: ${(e as Error).message}` };
+  }
+}
+
+export async function checkRls(supabaseKey: string): Promise<RlsCheckResult[]> {
   let payload: JwtPayload;
   let projectRef: string;
 
@@ -27,29 +45,10 @@ export async function checkRls(
   }
 
   const supabase: SupabaseClient = createClient(`https://${projectRef}.supabase.co`, supabaseKey);
-  const results: RlsCheckResult[] = [];
 
-  for (const table of tables) {
-    try {
-      const { data, error, status } = await supabase
-        .from(table)
-        .select('*')
-        .limit(30);
-
-      if (data && data.length >= 30) {
-        results.push({
-          table,
-          rlsDisabled: true,
-        });
-      }
-    } catch (e) {
-      results.push({
-        table,
-        rlsDisabled: false,
-        errorMessage: `例外発生: ${(e as Error).message}`
-      });
-    }
-  }
+  // すべてのテーブルに対するRLSチェックを並列で実行
+  const checkPromises = TABLES.map(table => checkTableRls(supabase, table));
+  const results = await Promise.all(checkPromises);
 
   return results;
 }

@@ -1,5 +1,5 @@
 import { checkRls } from './common/rlsChecker'
-import { decodeJwtAndGetProjectRef, cleanApiKey } from './common/utils'
+import { decodeJwtAndGetProjectRef } from './common/utils'
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
   (info) => {
@@ -13,7 +13,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
       }
 
       try {
-        const { projectRef, payload } = decodeJwtAndGetProjectRef(apiKeyHeader);
+        const { projectRef } = decodeJwtAndGetProjectRef(apiKeyHeader);
         const supabaseUrl = `https://${projectRef}.supabase.co`;
         
         chrome.storage.session.set({ supabaseUrl, supabaseKey: apiKeyHeader }).then(() => {
@@ -69,7 +69,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
 
     try {
-      const { projectRef, payload } = decodeJwtAndGetProjectRef(msg.apiKey);
+      const { projectRef } = decodeJwtAndGetProjectRef(msg.apiKey);
       const supabaseUrl = `https://${projectRef}.supabase.co`;
       
       chrome.storage.session.set({ supabaseUrl, supabaseKey: msg.apiKey }).then(() => {
@@ -91,7 +91,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 
   if (msg.action === 'execute') {
-    checkRls(msg.supabaseKey, msg.tables)
+    checkRls(msg.supabaseKey)
       .then(results => {
         const disabledTables = results.filter(r => r.rlsDisabled);
 

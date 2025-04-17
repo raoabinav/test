@@ -1,8 +1,6 @@
 // コンテンツスクリプトでSupabaseリクエストを検知する機能
 import { cleanApiKey } from '../common/utils';
 
-const supabaseElements = document.querySelectorAll('[data-supabase]');
-
 // Fetch APIをインターセプトしてSupabaseリクエストを検知
 const originalFetch = window.fetch;
 window.fetch = function(input: RequestInfo | URL, init?: RequestInit) {
