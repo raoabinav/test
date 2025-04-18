@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { JwtPayload, decodeJwtAndGetProjectRef, isTokenExpired, logError } from './utils';
-import { TABLES } from './constants';
+import { TABLES_WITH_PII } from './constants';
 import { RlsCheckResult } from './types';
 
 
@@ -43,8 +43,7 @@ export async function checkRls(supabaseKey: string): Promise<RlsCheckResult[]> {
 
   const supabase: SupabaseClient = createClient(`https://${projectRef}.supabase.co`, supabaseKey);
 
-  // すべてのテーブルに対するRLSチェックを並列で実行
-  const checkPromises = TABLES.map(table => checkTableRls(supabase, table));
+  const checkPromises = TABLES_WITH_PII.map(table => checkTableRls(supabase, table));
   const results = await Promise.all(checkPromises);
 
   return results;

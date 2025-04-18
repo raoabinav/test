@@ -161,10 +161,8 @@ const App = () => {
   );
 }
 
-// 既存のポップアップをチェック
 let container = document.getElementById('supabase-rls-checker-popup');
 
-// 存在しない場合のみ新しく作成
 if (!container) {
   container = document.createElement('div');
   container.id = 'supabase-rls-checker-popup';

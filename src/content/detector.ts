@@ -1,7 +1,6 @@
-import { cleanApiKey, logError } from '../common/utils';
+import { cleanApiKey } from '../common/utils';
 import { SupabaseRequestDetectedMessage, RlsCheckResultMessage } from '../common/types';
 
-// XMLHttpRequestを拡張するためのインターフェース
 interface SupabaseXmlHttpRequest extends XMLHttpRequest {
   _supabaseUrl?: string;
 }
