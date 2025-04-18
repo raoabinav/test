@@ -26,3 +26,5 @@ build/
 # Chrome extension specific
 *.pem
 *.crx
+
+dist.zip
