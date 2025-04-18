@@ -48,7 +48,7 @@ Supabase RLS Checker is a Chrome extension that automatically verifies Row Level
 
 ### Installing from Chrome Web Store
 
-1. Search for "Supabase RLS Checker" in the [Chrome Web Store](https://chrome.google.com/webstore/category/extensions)
+1. ~~Search for "Supabase RLS Checker" in the Chrome Web Store~~ <- Not yet published yet
 2. Click the "Add to Chrome" button to install
 
 ### Installing in Developer Mode
