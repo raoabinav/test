@@ -18,26 +18,6 @@ export interface SupabaseRequestDetectedMessage extends Message {
   apiKey: string;
 }
 
-export interface GetSupabaseDataMessage extends Message {
-  action: 'getSupabaseData';
-}
-
-export interface GetSupabaseDataResponse {
-  supabaseUrl?: string;
-  supabaseKey?: string;
-  error?: string;
-}
-
-export interface SetRlsPromptedMessage extends Message {
-  action: 'setRlsPrompted';
-  value: boolean;
-}
-
-export interface SetRlsPromptedResponse {
-  success: boolean;
-  error?: string;
-}
-
 export interface ExecuteMessage extends Message {
   action: 'execute';
   supabaseUrl: string;

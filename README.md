@@ -77,24 +77,9 @@ Supabase RLS Checker is a Chrome extension that automatically verifies Row Level
 
 ### How RLS is Checked for Each Table
 
-```typescript
-async function checkTableRls(supabase: SupabaseClient, table: string): Promise<RlsCheckResult> {
-  try {
-    const { data } = await supabase
-      .from(table)
-      .select('*')
-      .limit(30);
+The extension checks the RLS status for each table by executing a `select * limit 30` query
 
-    if (data && data.length >= 30) {
-      return { table, rlsDisabled: true };
-    }
-
-    return { table, rlsDisabled: false };
-  } catch (e) {
-    return { table, rlsDisabled: false, errorMessage: `Exception occurred: ${(e as Error).message}` };
-  }
-}
-```
+See: https://github.com/hand-dot/supabase-rls-checker/blob/main/src/common/rlsChecker.ts
 
 ### API Key Detection and JWT Verification
 
